@@ -33,6 +33,6 @@ class AFCCrashLogDirectory(AFC):
 		s = amdevice.start_service(AMSVC_CRASH_REPORT_COPY_MOBILE)
 		if s is None:
 			raise RuntimeError(u'Unable to launch:', AMSVC_CRASH_REPORT_COPY_MOBILE)
-		AFC.__init__(self, s)
+		AFC.__init__(self, s.handle())
 
 

@@ -37,7 +37,7 @@ class Syslog(object):
 			raise RuntimeError(u'Unable to launch:', AMSVC_SYSLOG_RELAY)
 
 	def disconnect(self):
-		os.close(self.s)
+		self.s.close()
 
 	def read(self, length=1024):
 		u'''reads at most length bytes from the syslog; blocking if no more data
@@ -46,7 +46,7 @@ class Syslog(object):
 		Arguments:
 		length -- the max bytes to read (default 1024)
 		'''
-		return os.read(self.s, length)
+		return self.s.read(length)
 
 
 def register_argparse_syslog(cmdargs):

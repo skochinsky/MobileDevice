@@ -27,6 +27,43 @@ import socket
 import select
 import os
 import glob
+import ctypes
+
+
+class SocketWrapper:
+	"""Create a file-like object wrapper for a socket so we can use 
+	the same code on Unix and Windows (socket can't be used as a file
+	handle on Windows)
+
+	"""
+	def __init__(self, s):
+		self.s = s
+
+	def handle(self):
+		return self.s
+
+	def read(self, size=4096):
+		"""Read data from the socket as if it were a file."""
+		if self.s is None:
+			return None
+		if os.name=='nt':
+			buf = create_string_buffer(size)
+			blen = ctypes.windll.WS2_32.recv(self.s, buf, size, 0)
+			return buf[:blen]
+		else:
+			return os.read(self.s, bufsize)
+
+	def write(self, data):
+		if os.name=='nt':
+			ctypes.windll.WS2_32.send(self.s, data, len(data), 0)
+		else:
+			os.write(self.s, data)
+
+	def close(self):
+		if os.name=='nt':
+			ctypes.windll.WS2_32.closesocket(self.s)
+		else:
+			os.close(self.s)
 
 
 class AMDevice(object):
@@ -306,7 +343,7 @@ class AMDevice(object):
 		options -- a dict of options, or None (default None)
 
 		Return:
-		The OS socket associated with the connection to the service
+		A SocketWrapper instance associated with the connection to the service
 
 		Error:
 		Raises RuntimeError on error
@@ -328,7 +365,7 @@ class AMDevice(object):
 		CFRelease(cfsvc_name)
 		if err:
 			raise RuntimeError(u'Unable to start service %s' % service_name)
-		return sock.value
+		return SocketWrapper(sock.value)
 
 	def get_usb_deviceid(self):
 		u'''Retrieves the USB device id

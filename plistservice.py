@@ -49,15 +49,15 @@ class PlistService(object):
 			raise RuntimeError(u'Unable to launch one of:', servicenames)
 
 	def disconnect(self):
-		os.close(self.s)
+		self.s.close()
 
 	def _sendmsg(self, msg):
 		endian = u'>I'
 		if self.bigendian:
 			endian = u'<I'
 		data = dict_to_plist_encoding(msg, self.format)
-		os.write(self.s, struct.pack(endian.encode(u'utf-8'), len(data)))
-		os.write(self.s, data)
+		self.s.write(struct.pack(endian.encode(u'utf-8'), len(data)))
+		self.s.write(data)
 
 
 	def _recvmsg(self):
@@ -71,7 +71,7 @@ class PlistService(object):
 			reply = ''
 			left = l
 			while left > 0:
-				r = os.read(self.s, left) 
+				r = self.s.read(left) 
 				if r is None:
 					raise RuntimeError(u'Unable to read reply')
 				reply += r

@@ -39,7 +39,7 @@ class CrashMover(object):
 			raise RuntimeError(u'Unable to launch: com.apple.crashreportmover')
 
 	def disconnect(self):
-		os.close(self.s)
+		self.s.close()
 
 	def move_crashlogs(self, extensions=None):
 		u'''Moves all crash logs into the afc crash log directory
@@ -50,9 +50,9 @@ class CrashMover(object):
 		'''
 		# XXX should we wait just in case?
 		time.sleep(2)
-		buf = os.read(self.s, 1)
+		buf = self.s.read(1)
 		while True:
-			buf += os.read(self.s, 1)
+			buf += self.s.read(1)
 			if buf == 'ping':
 				break # done!
 
