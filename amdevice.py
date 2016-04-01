@@ -108,7 +108,7 @@ class AMDevice(object):
 		'''
 		# AMDeviceGetName and AMDeviceCopyDeviceIdentifier return the same value
 		# AMDeviceRef + 20
-		cf = AMDeviceGetName(self.dev)
+		cf = AMDeviceCopyDeviceIdentifier(self.dev)
 		if cf is None:
 			raise RuntimeError(u'Unable to get device id')
 		return CFTypeTo(cf)
@@ -656,10 +656,10 @@ def argparse_parse(scope):
 						name = v.get_value(name=u'DeviceName')
 					except:
 						pass
-					print(u'%u: %s - "%s"' % (
+					print(u'%u: %s - "%r"' % (
 						self.device_idx, 
 						v.get_deviceid(), 
-						name.decode(u'utf-8')
+						name
 					))
 					args.func(args, v)
 					v.disconnect()
