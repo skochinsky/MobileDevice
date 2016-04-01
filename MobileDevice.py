@@ -33,11 +33,8 @@ if platform.system() == u'Darwin':
 elif platform.system() == u'Windows':
 	import _winreg
 	key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Apple Inc.\Apple Mobile Device Support\Shared")
-	if not key:
-		raise OSError(u'MobileDevice package not installed?!')
 	# for i in range(10): print _winreg.EnumValue(key, i)
 	v,t  = _winreg.QueryValueEx(key, u'MobileDeviceDLL')
-	print "mobieldevice DLL: %r" % v
 	MobileDevice = CDLL(v)
 else:
 	raise OSError(u'Platform not supported')
