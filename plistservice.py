@@ -24,6 +24,7 @@
 
 from MobileDevice import *
 import os
+import ctypes
 import struct
 
 
@@ -43,21 +44,39 @@ class PlistService(object):
 		for name in servicenames:
 			self.s = amdevice.start_service(name)
 			if self.s is not None:
+				print "launched %s" % name
 				break
 
 		if self.s is None:
 			raise RuntimeError(u'Unable to launch one of:', servicenames)
 
 	def disconnect(self):
-		os.close(self.s)
+	        if os.name=='nt':
+	        	ctypes.windll.WS2_32.closesocket(self.s)
+	        else:
+			os.close(self.s)
+
+	def os_send(self, data):
+	        if os.name=='nt':
+			ctypes.windll.WS2_32.send(self.s, data, len(data), 0)
+		else:
+			os.write(self.s, data)
+			
+	def os_recv (self, bufsize):
+	        if os.name=='nt':
+			buf = create_string_buffer(bufsize)
+			blen = ctypes.windll.WS2_32.recv(self.s, buf, bufsize, 0)
+			return buf[:blen]
+		else:
+			return os.read(self.s, bufsize)
 
 	def _sendmsg(self, msg):
 		endian = u'>I'
 		if self.bigendian:
 			endian = u'<I'
 		data = dict_to_plist_encoding(msg, self.format)
-		os.write(self.s, struct.pack(endian.encode(u'utf-8'), len(data)))
-		os.write(self.s, data)
+                self.os_send(struct.pack(endian.encode(u'utf-8'), len(data)))
+		self.os_send(data)
 
 
 	def _recvmsg(self):
@@ -65,13 +84,13 @@ class PlistService(object):
 		endian = u'>I'
 		if self.bigendian:
 			endian = u'<I'
-		length = os.read(self.s, 4)
+		length = self.os_recv(4)
 		if length is not None and len(length) == 4:
 			l = struct.unpack(endian.encode(u'utf-8'), length)[0]
 			reply = ''
 			left = l
 			while left > 0:
-				r = os.read(self.s, left) 
+				r = self.os_recv(left) 
 				if r is None:
 					raise RuntimeError(u'Unable to read reply')
 				reply += r
