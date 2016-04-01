@@ -636,6 +636,8 @@ def argparse_parse(scope):
 				sys.stdout.write(self._print_devices().encode("utf-8"))
 
 			else:
+				if len(self._devs) == 0:
+					print "No devices connected"
 				if len(self._devs) > 0:
 					devs = sorted(self._devs.keys())
 					if self.device_id is not None:
