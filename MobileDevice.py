@@ -31,7 +31,14 @@ from CoreFoundation import *
 if platform.system() == u'Darwin':
 	MobileDevice = CDLL(u'/System/Library/PrivateFrameworks/MobileDevice.framework/MobileDevice')
 elif platform.system() == u'Windows':
-	raise NotImplementedError(u'need to find and import the MobileDevice dll')
+	import _winreg
+	key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Apple Inc.\Apple Mobile Device Support\Shared")
+	if not key:
+		raise OSError(u'MobileDevice package not installed?!')
+	# for i in range(10): print _winreg.EnumValue(key, i)
+	v,t  = _winreg.QueryValueEx(key, u'MobileDeviceDLL')
+	print "mobieldevice DLL: %r" % v
+	MobileDevice = CDLL(v)
 else:
 	raise OSError(u'Platform not supported')
 
@@ -259,9 +266,8 @@ AMDeviceGetInterfaceType.argtypes = [AMDeviceRef]
 
 # AMDeviceGetLocalOrRemoteOffsetToResume - dont think we need
 
-AMDeviceGetName = MobileDevice.AMDeviceGetName
-AMDeviceGetName.restype = CFStringRef
-AMDeviceGetName.argtypes = [AMDeviceRef]
+AMDeviceCopyDeviceIdentifier= MobileDevice.AMDeviceCopyDeviceIdentifier
+AMDeviceCopyDeviceIdentifier.argtypes = [AMDeviceRef]
 
 # AMDeviceGetTypeID - dont need; returns the CFTypeID for AMDeviceRef
 
@@ -303,6 +309,19 @@ AMDeviceMountImage.argtypes = [
 	AMDeviceProgressCallback, 
 	c_void_p
 ]
+try:
+	AMDeviceMountImage = MobileDevice.AMDeviceMountImage
+	AMDeviceMountImage.restype = mach_error_t
+	AMDeviceMountImage.argtypes = [
+		AMDeviceRef, 
+		CFStringRef, 
+		CFDictionaryRef, 
+		AMDeviceProgressCallback, 
+		c_void_p
+	]
+except AttributeError:
+	AMDeviceMountImage = None
+	
 
 AMDeviceNotificationSubscribe = MobileDevice.AMDeviceNotificationSubscribe
 AMDeviceNotificationSubscribe.restype = mach_error_t
@@ -331,6 +350,12 @@ AMDevicePair.argtypes = [AMDeviceNotificationRef]
 AMDeviceRelease = MobileDevice.AMDeviceRelease
 AMDeviceRelease.restype = None
 AMDeviceRelease.argtypes = [AMDeviceRef]
+try:
+	AMDeviceRelease = MobileDevice.AMDeviceRelease
+	AMDeviceRelease.restype = None
+	AMDeviceRelease.argtypes = [AMDeviceRef]
+except AttributeError:
+	AMDeviceRelease = CFRelease
 
 # AMDeviceRemoveApplicationArchive - I'm guessing its the legacy version of AMDeviceSecureUninstallApplication
 

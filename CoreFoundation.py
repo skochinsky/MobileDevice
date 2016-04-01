@@ -30,7 +30,16 @@ import datetime
 if platform.system() == u'Darwin':
 	CoreFoundation = CDLL(u'/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation')
 elif platform.system() == u'Windows':
-	raise NotImplementedError(u'need to find and import the CoreFoundation dll')
+	import _winreg
+	key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Apple Inc.\Apple Application Support")
+	if not key:
+		raise OSError(u'MobileDevice package not installed?!')
+	# for i in range(10): print _winreg.EnumValue(key, i)
+	v,t  = _winreg.QueryValueEx(key, u'InstallDir')
+	windll.kernel32.SetDllDirectoryW(v)
+	CoreFoundation = CDLL(v+ u'CoreFoundation.dll')
+
+	#raise NotImplementedError(u'need to find and import the CoreFoundation dll')
 else:
 	raise OSError(u'Platform not supported')
 
