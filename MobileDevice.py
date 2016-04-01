@@ -267,6 +267,7 @@ AMDeviceGetInterfaceType.argtypes = [AMDeviceRef]
 # AMDeviceGetLocalOrRemoteOffsetToResume - dont think we need
 
 AMDeviceCopyDeviceIdentifier= MobileDevice.AMDeviceCopyDeviceIdentifier
+AMDeviceCopyDeviceIdentifier.restype = CFStringRef
 AMDeviceCopyDeviceIdentifier.argtypes = [AMDeviceRef]
 
 # AMDeviceGetTypeID - dont need; returns the CFTypeID for AMDeviceRef
@@ -300,15 +301,6 @@ AMDeviceIsPaired.argtypes = [AMDeviceRef]
 # AMDeviceLookupApplicationArchives - legacy version of AMDeviceLookupApplications
 # AMDeviceLookupApplications - sends Browse to installation_proxy; we do directly
 
-AMDeviceMountImage = MobileDevice.AMDeviceMountImage
-AMDeviceMountImage.restype = mach_error_t
-AMDeviceMountImage.argtypes = [
-	AMDeviceRef, 
-	CFStringRef, 
-	CFDictionaryRef, 
-	AMDeviceProgressCallback, 
-	c_void_p
-]
 try:
 	AMDeviceMountImage = MobileDevice.AMDeviceMountImage
 	AMDeviceMountImage.restype = mach_error_t
@@ -347,9 +339,6 @@ AMDevicePair.argtypes = [AMDeviceNotificationRef]
 # AMDevicePreflightOperationGetTypeID - no idea
 # AMDevicePreflightOperationInvalidate - no idea
 
-AMDeviceRelease = MobileDevice.AMDeviceRelease
-AMDeviceRelease.restype = None
-AMDeviceRelease.argtypes = [AMDeviceRef]
 try:
 	AMDeviceRelease = MobileDevice.AMDeviceRelease
 	AMDeviceRelease.restype = None
