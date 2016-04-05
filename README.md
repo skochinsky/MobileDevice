@@ -4,8 +4,8 @@ MobileDevice.py
 A python package which aims to wrap Apple's MobileDevice API; to provide 
 complete support for all iOS, device services.
 
-The project aims to provide both a native Pythin API (using ctypes) and a fully
-features command line interface.
+The project aims to provide both a native Python API (using ctypes) and a 
+full-featured command line interface.
 
 You can run the project directory as a package e.g.
 
